@@ -1,0 +1,2 @@
+# testln
+tester for LazNote
