@@ -23,6 +23,7 @@ const state = {
   settings: {
     style: 'hifi',        // hifi | industrial
     theme: 'dark',        // dark | light
+    accent: '#c5ec3a',    // custom accent color (defaults to lime)
     groqKey: '',
     autoFile: true,
     showWhy: true,
@@ -388,7 +389,7 @@ function renderBlade() {
     const stk = stackById(n.stack);
     const urgencyColor = n.urgency === 'high' ? '#c5ec3a' : n.urgency === 'med' ? '#ff9900' : '#666';
     const allCardTags = [...new Set([...(n.hashtags||[]), ...(n.tags||[])])];
-    const tagsHtml = allCardTags.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0;">${allCardTags.map(t => `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(197,236,58,0.1);color:#c5ec3a;border:1px solid rgba(197,236,58,0.3);">#${t}</span>`).join('')}</div>` : '';
+    const tagsHtml = allCardTags.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0;">${allCardTags.map(t => `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(197,236,58,0.1);color:var(--lime);border:1px solid rgba(197,236,58,0.3);">#${t}</span>`).join('')}</div>` : '';
     return `<div class="blade ${d.cls}" data-id="${n.id}" style="${n.done ? 'opacity:0.6;' : ''}">
       <div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
@@ -589,7 +590,7 @@ function renderNote() {
   // Build hashtags display
   const allHashtags = [...new Set([...(n.hashtags||[]), ...(n.tags||[])])];
   const hashtagsHtml = allHashtags.length
-    ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">${allHashtags.map(t => `<span style="font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(197,236,58,0.12);color:#c5ec3a;border:1px solid rgba(197,236,58,0.25);cursor:pointer;" onclick="LazNote.searchTag('${t}')">#${t}</span>`).join('')}</div>`
+    ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">${allHashtags.map(t => `<span style="font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(197,236,58,0.12);color:var(--lime);border:1px solid rgba(197,236,58,0.25);cursor:pointer;" onclick="LazNote.searchTag('${t}')">#${t}</span>`).join('')}</div>`
     : '';
 
   // Build linked topics
@@ -604,7 +605,7 @@ function renderNote() {
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
       <span class="chip ${d.cls === 'now' ? 'lime' : ''}">${d.label}</span>
       <span class="chip">${new Date(n.createdAt).toLocaleDateString()}</span>
-      ${n.urgency && n.urgency !== 'low' ? `<span class="chip" style="color:${n.urgency==='high'?'#c5ec3a':'#ff9900'};">${n.urgency.toUpperCase()}</span>` : ''}
+      ${n.urgency && n.urgency !== 'low' ? `<span class="chip" style="color:${n.urgency==='high'?'var(--lime)':'#ff9900'};">${n.urgency.toUpperCase()}</span>` : ''}
     </div>
 
     <textarea class="input" id="note-text" style="margin-top:14px;min-height:180px;${isDone ? 'opacity:0.7;' : ''}" ${isDone ? 'readonly' : ''}>${escapeHtml(n.text)}</textarea>
@@ -621,7 +622,7 @@ function renderNote() {
       <div id="logic-section" style="display:none;margin-top:2px;padding:12px;background:var(--surface);border:1px solid rgba(197,236,58,0.2);border-radius:8px;">
         ${n.aiReasoning || n.why ? `<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;color:var(--lime);margin-bottom:6px;">AI REASONING</div><div style="font-size:12px;color:var(--ink-70);line-height:1.6;">${escapeHtml(n.aiReasoning || n.why)}</div></div>` : ''}
         ${n.urgencyReason ? `<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;color:#ff9900;margin-bottom:6px;">URGENCY</div><div style="font-size:12px;color:var(--ink-70);line-height:1.6;">${escapeHtml(n.urgencyReason)}</div></div>` : ''}
-        ${(n.hashtags||[]).length ? `<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;color:var(--ink-50);margin-bottom:6px;">AUTO-HASHTAGS</div><div style="display:flex;gap:4px;flex-wrap:wrap;">${(n.hashtags||[]).map(h=>`<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(197,236,58,0.1);color:#c5ec3a;border:1px solid rgba(197,236,58,0.2);">#${h}</span>`).join('')}</div></div>` : ''}
+        ${(n.hashtags||[]).length ? `<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;color:var(--ink-50);margin-bottom:6px;">AUTO-HASHTAGS</div><div style="display:flex;gap:4px;flex-wrap:wrap;">${(n.hashtags||[]).map(h=>`<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:rgba(197,236,58,0.1);color:var(--lime);border:1px solid rgba(197,236,58,0.2);">#${h}</span>`).join('')}</div></div>` : ''}
         ${(n.links||[]).length ? `<div style="margin-bottom:10px;"><div style="font-family:var(--mono);font-size:9.5px;letter-spacing:0.14em;color:var(--ink-50);margin-bottom:6px;">LINKED TOPICS</div><div style="display:flex;gap:4px;flex-wrap:wrap;">${(n.links||[]).map(l=>`<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:var(--surface-2);color:var(--ink-70);border:1px solid var(--line-2);">${escapeHtml(l)}</span>`).join('')}</div></div>` : ''}
         ${!n.aiReasoning && !n.why && !(n.hashtags||[]).length && !(n.links||[]).length ? `<div style="font-size:12px;color:var(--ink-50);margin-bottom:8px;">No AI logic recorded.${state.settings.groqKey ? ' Tap Re-sort to analyse this note.' : ' Connect Groq in Settings to enable AI analysis.'}</div>` : ''}
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:10px;color:var(--ink-30);">Confidence: ${n.confidence ? Math.round(n.confidence * (n.confidence > 1 ? 1 : 100)) + '%' : '—'}</div>
@@ -748,7 +749,7 @@ function renderArchive() {
       const stk = stackById(n.stack);
       const doneDate = n.doneAt ? new Date(n.doneAt).toLocaleDateString() : '';
       const tagsHtml = (n.hashtags||[]).length
-        ? (n.hashtags||[]).slice(0,3).map(t=>`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(197,236,58,0.1);color:#c5ec3a;border:1px solid rgba(197,236,58,0.2);">#${t}</span>`).join(' ')
+        ? (n.hashtags||[]).slice(0,3).map(t=>`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(197,236,58,0.1);color:var(--lime);border:1px solid rgba(197,236,58,0.2);">#${t}</span>`).join(' ')
         : '';
       html += `<div style="background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;margin-bottom:8px;opacity:0.85;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
@@ -961,16 +962,52 @@ function renderSettings() {
   $('#settings-body').innerHTML = `
     <div class="section-label">Appearance</div>
     <div class="section-group">
-      <div class="row"><span class="r-label">Style</span>
-        <div class="seg" id="seg-style">
-          <button data-v="hifi" class="${s.style === 'hifi' ? 'on' : ''}">HiFi</button>
-          <button data-v="industrial" class="${s.style === 'industrial' ? 'on' : ''}">Industrial</button>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:6px;">
+        <span class="r-label">Style</span>
+        <div class="style-preview" id="seg-style">
+          <div class="style-preview-tile lush ${s.style !== 'industrial' ? 'on' : ''}" data-v="hifi">
+            <div class="sp-name">Lush</div>
+            <div class="sp-sample">Soft glow · rounded</div>
+          </div>
+          <div class="style-preview-tile industrial ${s.style === 'industrial' ? 'on' : ''}" data-v="industrial">
+            <div class="sp-name">Industrial</div>
+            <div class="sp-sample">Grid · mono · sharp</div>
+          </div>
         </div>
       </div>
       <div class="row"><span class="r-label">Theme</span>
         <div class="seg" id="seg-theme">
           <button data-v="dark" class="${s.theme === 'dark' ? 'on' : ''}">Dark</button>
           <button data-v="light" class="${s.theme === 'light' ? 'on' : ''}">Light</button>
+        </div>
+      </div>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="r-label">Accent color</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--ink-50);letter-spacing:0.06em;" id="accent-current">${(s.accent || '#c5ec3a').toUpperCase()}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;" id="accent-swatches">
+          ${[
+            ['#c5ec3a', 'Lime'],
+            ['#f5b133', 'Amber'],
+            ['#ef5350', 'Coral'],
+            ['#3ecfb8', 'Teal'],
+            ['#7c8cff', 'Indigo'],
+            ['#e879f9', 'Magenta'],
+            ['#ffd166', 'Honey'],
+            ['#ffffff', 'Mono']
+          ].map(([hex, name]) => `
+            <button class="accent-sw ${(s.accent || '#c5ec3a').toLowerCase() === hex.toLowerCase() ? 'on' : ''}"
+              data-color="${hex}" title="${name}"
+              style="width:32px;height:32px;border-radius:8px;background:${hex};border:2px solid ${(s.accent || '#c5ec3a').toLowerCase() === hex.toLowerCase() ? '#fff' : 'var(--line-2)'};cursor:pointer;padding:0;position:relative;"
+              aria-label="${name} accent">
+            </button>
+          `).join('')}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="color" id="accent-custom" value="${s.accent || '#c5ec3a'}" style="width:38px;height:34px;border:1px solid var(--line-2);border-radius:6px;background:transparent;padding:2px;cursor:pointer;">
+          <input class="input" id="accent-hex" type="text" placeholder="#RRGGBB" value="${(s.accent || '#c5ec3a').toUpperCase()}" maxlength="7" style="flex:1;font-family:var(--mono);font-size:12px;text-transform:uppercase;">
+          <button class="btn" id="accent-reset" style="font-size:11px;padding:8px 12px;" onclick="LazNote.resetAccent()">Reset</button>
         </div>
       </div>
     </div>
@@ -1024,7 +1061,7 @@ function renderSettings() {
     <div class="section-group">
       <div class="row" onclick="document.getElementById('about-modal').style.display='flex'"><span class="r-label">About LazNote</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
       <div class="row" onclick="document.getElementById('help-modal').style.display='flex'"><span class="r-label">Help &amp; FAQ</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
-      <div class="row"><span class="r-label">Version</span><span class="r-value">4.0</span></div>
+      <div class="row"><span class="r-label">Version</span><span class="r-value">4.1</span></div>
       <div class="row"><span class="r-label">Storage</span><span class="r-value">Local · IndexedDB</span></div>
     </div>
   `;
@@ -1032,12 +1069,41 @@ function renderSettings() {
   $$('#settings-body [data-tog]').forEach(r => r.addEventListener('click', async () => {
     const k = r.dataset.tog; state.settings[k] = !state.settings[k]; await saveSettings(); renderSettings();
   }));
-  $$('#seg-style button').forEach(b => b.addEventListener('click', async () => {
+  // Style — now uses .style-preview-tile elements (or legacy buttons as fallback)
+  $$('#seg-style .style-preview-tile, #seg-style button').forEach(b => b.addEventListener('click', async () => {
     state.settings.style = b.dataset.v; applyTheme(); await saveSettings(); renderSettings();
   }));
   $$('#seg-theme button').forEach(b => b.addEventListener('click', async () => {
     state.settings.theme = b.dataset.v; applyTheme(); await saveSettings(); renderSettings();
   }));
+
+  // Accent color — preset swatches
+  $$('#accent-swatches .accent-sw').forEach(sw => sw.addEventListener('click', async () => {
+    await LazNote.setAccent(sw.dataset.color);
+    renderSettings();
+  }));
+  // Accent color — native color picker
+  const customInput = document.getElementById('accent-custom');
+  if (customInput) {
+    customInput.addEventListener('input', e => LazNote.setAccent(e.target.value, false));
+    customInput.addEventListener('change', async e => {
+      await LazNote.setAccent(e.target.value, true);
+      renderSettings();
+    });
+  }
+  // Accent color — hex text input
+  const hexInput = document.getElementById('accent-hex');
+  if (hexInput) {
+    hexInput.addEventListener('change', async e => {
+      const v = e.target.value.trim();
+      if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+        await LazNote.setAccent(v.startsWith('#') ? v : '#' + v, true);
+        renderSettings();
+      } else {
+        hexInput.value = (state.settings.accent || '#c5ec3a').toUpperCase();
+      }
+    });
+  }
 }
 
 // ─── Groq detail ──────────────────────────────────────────
@@ -1061,8 +1127,9 @@ function renderGroq() {
     </div>
     <div style="display:flex;gap:6px;margin-top:8px;">
       <button class="btn" style="flex:1;" onclick="LazNote.editKey()">${s.groqKey ? 'Replace' : 'Save'}</button>
-      <button class="btn" style="flex:1;" onclick="LazNote.testKey()" ${s.groqKey ? '' : 'disabled'}>Test</button>
+      <button class="btn" id="groq-test-btn" style="flex:1;" onclick="LazNote.testKey()">Test</button>
     </div>
+    <div id="groq-test-result" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;"></div>
 
     <div class="section-label">Models per task</div>
     <div class="section-group">
@@ -1115,6 +1182,22 @@ const LazNote = {
     document.querySelectorAll('#ds-col-toggle button').forEach(b => {
       b.classList.toggle('on', String(b.dataset.cols) === String(n));
     });
+  },
+  // Accent color setter — used by swatch + native color picker + hex input
+  async setAccent(hex, persist = true) {
+    if (!hex) return;
+    hex = hex.trim();
+    if (!hex.startsWith('#')) hex = '#' + hex;
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+    state.settings.accent = hex;
+    applyAccent(hex);
+    if (persist) await saveSettings();
+  },
+  async resetAccent() {
+    state.settings.accent = '#c5ec3a';
+    applyAccent('#c5ec3a');
+    await saveSettings();
+    renderSettings();
   },
   // ── SEARCH ──────────────────────────────────────────
   search() {
@@ -1188,11 +1271,77 @@ const LazNote = {
     renderGroq();
   },
   async testKey() {
-    toast('Testing…', 'lime');
+    const btn    = document.getElementById('groq-test-btn');
+    const result = document.getElementById('groq-test-result');
+    const input  = document.getElementById('groq-key-input');
+
+    // If user typed something that looks like a fresh key (not just the masked placeholder),
+    // use the input value instead of the stored one.
+    const typed = input?.value.trim() || '';
+    const looksMasked = typed.startsWith('••');
+    const useTyped = typed && !looksMasked && typed.startsWith('gsk_');
+
+    const keyToTest = useTyped ? typed : state.settings.groqKey;
+    if (!keyToTest) {
+      result.style.display = 'block';
+      result.style.background = 'rgba(239,83,80,0.08)';
+      result.style.border = '1px solid rgba(239,83,80,0.3)';
+      result.style.color = '#ff7066';
+      result.innerHTML = '<strong>No key to test.</strong> Paste a Groq key starting with <code>gsk_</code> and tap Save first, or paste a fresh key and tap Test.';
+      return;
+    }
+
+    // Show "testing…" state
+    result.style.display = 'block';
+    result.style.background = 'rgba(197,236,58,0.08)';
+    result.style.border = '1px solid rgba(197,236,58,0.25)';
+    result.style.color = 'var(--ink)';
+    result.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--lime);margin-right:8px;vertical-align:-1px;animation:pulse 1s infinite;"></span>Testing key against api.groq.com…';
+    btn.disabled = true;
+    btn.textContent = 'Testing…';
+
+    const t0 = Date.now();
     try {
-      const out = await groqChat({ model: MODELS.sort, messages: [{ role: 'user', content: 'Reply with the single word: ok' }] });
-      toast(out.toLowerCase().includes('ok') ? 'Connected ✓' : 'Got response · ' + out.slice(0, 30), 'lime');
-    } catch (e) { toast(e.message.slice(0, 60)); }
+      // Direct fetch so we test the typed key without overwriting saved state
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${keyToTest}` },
+        body: JSON.stringify({
+          model: MODELS.sort,
+          messages: [{ role: 'user', content: 'Reply with the single word: ok' }],
+          temperature: 0.2
+        })
+      });
+      const ms = Date.now() - t0;
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        let msg = `HTTP ${resp.status}`;
+        try { const j = JSON.parse(txt); msg = j.error?.message || msg; } catch(_) {}
+        result.style.background = 'rgba(239,83,80,0.08)';
+        result.style.border = '1px solid rgba(239,83,80,0.3)';
+        result.style.color = '#ff7066';
+        result.innerHTML = `<strong>✗ Failed</strong> · ${escapeHtml(msg.slice(0,140))}`;
+      } else {
+        const data = await resp.json();
+        const out = data?.choices?.[0]?.message?.content || '';
+        const ok = out.toLowerCase().includes('ok');
+        result.style.background = 'rgba(197,236,58,0.08)';
+        result.style.border = '1px solid rgba(197,236,58,0.3)';
+        result.style.color = 'var(--lime)';
+        result.innerHTML = ok
+          ? `<strong>✓ Connected</strong> · ${ms}ms · model <code>${MODELS.sort}</code> replied "ok"`
+          : `<strong>✓ Reachable</strong> · ${ms}ms · model replied: ${escapeHtml(out.slice(0,80))}`;
+      }
+    } catch (e) {
+      result.style.background = 'rgba(239,83,80,0.08)';
+      result.style.border = '1px solid rgba(239,83,80,0.3)';
+      result.style.color = '#ff7066';
+      result.innerHTML = `<strong>✗ Network error</strong> · ${escapeHtml((e.message || String(e)).slice(0,140))}`;
+    } finally {
+      btn.disabled = !state.settings.groqKey && !useTyped;
+      btn.textContent = 'Test';
+    }
   },
   // ── NOTE LIFECYCLE ──────────────────────────────────
   async confirmAirlock() {
@@ -1673,7 +1822,7 @@ const LazNote = {
       <div>
         <div class="edit-field-label">Urgency</div>
         <div style="display:flex;gap:6px;margin-top:8px;">
-          ${[['high','#c5ec3a'],['med','#ff9900'],['low','var(--ink-50)']].map(([u,c]) => `<span class="chip edit-urg-chip ${n.urgency===u?'lime':''}" data-urg="${u}" onclick="LazNote._editSelectUrgency('${u}')" style="cursor:pointer;${n.urgency===u?'':''}color:${n.urgency===u?'':c};">${u.charAt(0).toUpperCase()+u.slice(1)}</span>`).join('')}
+          ${[['high','var(--lime)'],['med','#ff9900'],['low','var(--ink-50)']].map(([u,c]) => `<span class="chip edit-urg-chip ${n.urgency===u?'lime':''}" data-urg="${u}" onclick="LazNote._editSelectUrgency('${u}')" style="cursor:pointer;${n.urgency===u?'':''}color:${n.urgency===u?'':c};">${u.charAt(0).toUpperCase()+u.slice(1)}</span>`).join('')}
         </div>
       </div>
 
@@ -1908,6 +2057,34 @@ window.LazNote.toggleLogicSection = toggleLogicSection;
 function applyTheme() {
   document.body.classList.toggle('industrial', state.settings.style === 'industrial');
   document.body.classList.toggle('light', state.settings.theme === 'light');
+  applyAccent(state.settings.accent);
+}
+
+// Apply (or clear) the user's chosen accent color by overriding --lime tokens on <body>
+function applyAccent(hex) {
+  const body = document.body;
+  if (!hex || hex === '#c5ec3a' || hex === '#C5EC3A') {
+    // Reset to default lime — remove inline overrides so the CSS variables apply
+    body.style.removeProperty('--lime');
+    body.style.removeProperty('--lime-glow');
+    body.style.removeProperty('--lime-soft');
+    body.style.removeProperty('--accent');
+    return;
+  }
+  const { r, g, b } = hexToRgb(hex);
+  body.style.setProperty('--lime', hex);
+  body.style.setProperty('--accent', hex);
+  body.style.setProperty('--lime-glow', `rgba(${r},${g},${b},0.55)`);
+  body.style.setProperty('--lime-soft', `rgba(${r},${g},${b},0.15)`);
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.slice(0,2), 16),
+    g: parseInt(h.slice(2,4), 16),
+    b: parseInt(h.slice(4,6), 16)
+  };
 }
 
 // ─── Wiring ──────────────────────────────────────────────
@@ -2050,7 +2227,7 @@ function renderDesktopEditPanel() {
   const isDone = n.status === 'done';
   const allHashtags = [...new Set([...(n.hashtags||[]), ...(n.tags||[])])];
   const hashtagsHtml = allHashtags.length
-    ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">${allHashtags.map(t => `<span style="font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(197,236,58,0.12);color:#c5ec3a;border:1px solid rgba(197,236,58,0.25);">#${t}</span>`).join('')}</div>`
+    ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;">${allHashtags.map(t => `<span style="font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(197,236,58,0.12);color:var(--lime);border:1px solid rgba(197,236,58,0.25);">#${t}</span>`).join('')}</div>`
     : '';
   bodyEl.innerHTML = `
     <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--lime);text-transform:uppercase;">${stk.name} · ${d.label}</div>

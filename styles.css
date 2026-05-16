@@ -12,6 +12,7 @@
   --lime: #c5ec3a;
   --lime-glow: rgba(197, 236, 58, 0.55);
   --lime-soft: rgba(197, 236, 58, 0.15);
+  --accent: var(--lime); /* picker overrides this AND --lime via inline body style */
   --amber: #f5b133;
   --red: #ef5350;
   --r-sm: 6px; --r-md: 10px; --r-lg: 18px;
@@ -22,12 +23,64 @@
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; overscroll-behavior: none; }
 body { min-height: 100vh; min-height: 100dvh; }
 
-/* Industrial style overrides */
-body.industrial { --r-sm: 0px; --r-md: 2px; --r-lg: 4px; --lime-glow: rgba(197, 236, 58, 0); }
-body.industrial .blade { border-radius: 0 !important; }
-body.industrial .btn, body.industrial .input, body.industrial .icon-btn, body.industrial .chip, body.industrial .pill { border-radius: 2px !important; }
-body.industrial .fab { border-radius: 0; }
+/* ═══════════════════════════════════════════════════════════════
+   STYLE MODES — body.industrial vs default (Lush)
+   Industrial is meant to FEEL different on a glance.
+   ═══════════════════════════════════════════════════════════════ */
+body.industrial {
+  /* Sharper geometry */
+  --r-sm: 0px; --r-md: 0px; --r-lg: 2px;
+  /* No glow */
+  --lime-glow: rgba(0,0,0,0);
+  /* Cooler, more "console" palette */
+  --bg: #0a0c0a;
+  --bg-2: #11140e;
+  --surface: #15180f;
+  --surface-2: #1a1d13;
+  --line-2: rgba(255,255,255,0.10);
+}
+body.industrial .app-shell {
+  /* Grid-paper background using two repeating linear gradients */
+  background:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--bg);
+}
+body.industrial .blade { border-radius: 0 !important; border-left: 3px solid var(--accent); padding-left: 13px; }
+body.industrial .blade:not(.lime) { border-left-color: var(--line-2); }
+body.industrial .btn, body.industrial .input, body.industrial .icon-btn,
+body.industrial .chip, body.industrial .pill, body.industrial .action-btn,
+body.industrial textarea.input, body.industrial .capture-textarea {
+  border-radius: 0 !important;
+}
+body.industrial .fab { border-radius: 0; box-shadow: 0 0 0 3px var(--accent), 0 8px 16px rgba(0,0,0,0.6); }
 body.industrial .fab::after { display: none; }
+body.industrial h1, body.industrial h2, body.industrial h3,
+body.industrial .desktop-main-header h1, body.industrial .modal-title {
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+body.industrial .topbar h1 { text-transform: uppercase; font-size: 13px; letter-spacing: 0.18em; }
+body.industrial .desktop-main-header h1 { text-transform: uppercase; letter-spacing: 0.04em; font-size: 18px; }
+body.industrial .section-label { color: var(--accent); letter-spacing: 0.18em; }
+body.industrial .modal-sheet, body.industrial .section-group, body.industrial .blade,
+body.industrial .scan-group-card, body.industrial .onb-demo, body.industrial .merge-confirm-preview {
+  border-radius: 0 !important;
+  border-width: 1px;
+}
+body.industrial .scan-group-header { border-radius: 0; }
+body.industrial .action-btn { border-width: 1px; }
+body.industrial .desktop-sidebar { background: var(--bg); border-right: 1px solid var(--accent); }
+body.industrial .desktop-nav-item.active { border-left-color: var(--accent); background: rgba(0,0,0,0.3); }
+body.industrial .desktop-nav-item.active::after { content: ""; display: block; }
+body.industrial .desktop-new-note { border-radius: 0; box-shadow: 0 0 0 1px var(--accent); }
+body.industrial .ds-brand-icon { border-radius: 0; }
+body.industrial .desktop-main-header { border-bottom: 1px solid var(--accent); }
+body.industrial .botnav { border-top: 1px solid var(--accent); }
+body.industrial .pill { border-radius: 0; }
+body.industrial .toast { border-radius: 0; border-left: 3px solid var(--accent); }
+body.industrial .toast-undo { border-radius: 0; border-left: 3px solid var(--accent); }
 
 /* Light theme */
 body.light { --bg: #f6f6f1; --bg-2: #ececde; --surface: #ffffff; --surface-2: #f0f0e7; --line-2: rgba(0,0,0,0.08); --ink: #0e1108; --ink-70: rgba(14,17,8,0.7); --ink-50: rgba(14,17,8,0.5); --ink-30: rgba(14,17,8,0.3); --lime: #7ba91a; --lime-glow: rgba(123,169,26,0.35); --lime-soft: rgba(123,169,26,0.12); }
@@ -842,4 +895,82 @@ textarea.input { font-family: var(--sans); font-size: 15px; min-height: 120px; r
 /* ─── Long-press tooltip indicator on touch ───────────────────── */
 @media (hover: none) {
   .has-tip { position: relative; }
+}
+
+/* ─── Accent color picker ─────────────────────────────────── */
+.accent-sw {
+  transition: transform .12s, box-shadow .12s;
+  outline: none;
+  color: inherit;
+}
+.accent-sw:hover { transform: scale(1.08); }
+.accent-sw.on {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  transform: scale(1.05);
+}
+.accent-sw.on::after {
+  content: "✓"; position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: #0b0d0a; font-weight: 700; font-size: 14px;
+  text-shadow: 0 0 2px rgba(255,255,255,0.6);
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 4px; }
+input[type="color"]::-moz-color-swatch { border: 0; border-radius: 4px; }
+
+/* ─── Beefed-up segmented switch (style / theme) ──────────── */
+.seg button {
+  transition: all .15s;
+}
+.seg button.on {
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 12px rgba(0,0,0,0.3);
+}
+
+/* Preview tile inside the style row for industrial */
+.style-preview {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-top: 8px;
+}
+.style-preview-tile {
+  border: 1px solid var(--line-2);
+  padding: 10px 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .15s, transform .12s;
+}
+.style-preview-tile:hover { transform: translateY(-1px); }
+.style-preview-tile.on { border-color: var(--accent); border-width: 2px; padding: 9px 11px; }
+.style-preview-tile .sp-name {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-70); margin-bottom: 6px;
+}
+.style-preview-tile.on .sp-name { color: var(--accent); }
+.style-preview-tile .sp-sample {
+  height: 38px; border-radius: 6px;
+  background: var(--surface-2);
+  display: flex; align-items: center; padding: 0 10px;
+  font-size: 11px; color: var(--ink-70);
+}
+.style-preview-tile.lush .sp-sample {
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--surface), var(--surface-2));
+  box-shadow: 0 0 18px rgba(197,236,58,0.08);
+}
+.style-preview-tile.lush .sp-sample::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); margin-right: 8px;
+  box-shadow: 0 0 8px var(--accent);
+}
+.style-preview-tile.industrial .sp-sample {
+  border-radius: 0;
+  background:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px) 0 0 / 8px 8px,
+    var(--surface-2);
+  border-left: 3px solid var(--accent);
+}
+.style-preview-tile.industrial .sp-sample::before {
+  content: ""; width: 8px; height: 8px;
+  background: var(--accent); margin-right: 8px;
 }
