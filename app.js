@@ -1061,7 +1061,7 @@ function renderSettings() {
     <div class="section-group">
       <div class="row" onclick="document.getElementById('about-modal').style.display='flex'"><span class="r-label">About LazNote</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
       <div class="row" onclick="document.getElementById('help-modal').style.display='flex'"><span class="r-label">Help &amp; FAQ</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
-      <div class="row"><span class="r-label">Version</span><span class="r-value">4.2</span></div>
+      <div class="row"><span class="r-label">Version</span><span class="r-value">4.3</span></div>
       <div class="row"><span class="r-label">Storage</span><span class="r-value">Local · IndexedDB</span></div>
     </div>
   `;
@@ -2097,8 +2097,132 @@ document.getElementById('search-input')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') LazNote.doSearch();
 });
 
-// Hardware back button (Android / browser history)
-window.addEventListener('popstate', () => back());
+// ─── Hardware back-button guard ───────────────────────────
+// Strategy: keep one extra history entry as a "guard" so popstate fires
+// instead of the system exiting the app. We consume the popstate, do the
+// right thing (close modal → navigate back → warn before exit), then
+// re-push the guard so we're armed for the next press.
+
+let _backExitArmed = false;       // user pressed back at root once; second press exits
+let _backExitTimer = null;
+const ROOT_VIEW = 'blade';
+
+function _isAnyModalOpen() {
+  const modalIds = [
+    'merge-confirm-modal', 'scan-modal', 'print-modal',
+    'stack-modal', 'input-modal', 'search-modal',
+    'about-modal', 'help-modal', 'note-edit-modal'
+  ];
+  for (const id of modalIds) {
+    const m = document.getElementById(id);
+    if (m && m.style.display && m.style.display !== 'none') return id;
+  }
+  return null;
+}
+
+function _closeTopModal() {
+  const id = _isAnyModalOpen();
+  if (!id) return false;
+  // Special-case the merge confirm so we use our cancel handler (clears state)
+  if (id === 'merge-confirm-modal' && window.LazNote?.cancelMergeConfirm) {
+    LazNote.cancelMergeConfirm();
+  } else {
+    document.getElementById(id).style.display = 'none';
+  }
+  return true;
+}
+
+function _pushBackGuard() {
+  try {
+    history.pushState({ _guard: true, view: state.view }, '', location.href.split('?')[0]);
+  } catch (e) {}
+}
+
+function handleHardwareBack() {
+  // 1. Capture sheet open? Close it.
+  const capture = document.getElementById('capture');
+  if (capture && capture.classList.contains('open')) {
+    closeCapture();
+    _pushBackGuard();
+    return;
+  }
+  // 2. Any modal open? Close the top one.
+  if (_closeTopModal()) {
+    _pushBackGuard();
+    return;
+  }
+  // 3. On desktop with a note open in the edit panel? Close it.
+  if (typeof isDesktop === 'function' && isDesktop() &&
+      document.getElementById('desktop-edit-header')?.style.display !== 'none') {
+    if (typeof closeDesktopEditPanel === 'function') closeDesktopEditPanel();
+    state.currentNoteId = null;
+    _pushBackGuard();
+    return;
+  }
+  // 4. On onboarding? Walk back through the cards.
+  if (state.view === 'onb' && typeof onbIdx !== 'undefined' && onbIdx > 0) {
+    onbIdx--;
+    if (typeof renderOnb === 'function') renderOnb();
+    _pushBackGuard();
+    return;
+  }
+  // 5. Not on root view? Navigate back through the in-app stack.
+  if (state.view !== ROOT_VIEW && state.view !== 'onb') {
+    back();
+    _pushBackGuard();
+    return;
+  }
+  // 6. On root view (or first onb card) → confirm-to-exit pattern.
+  if (_backExitArmed) {
+    // Second press within window — let the system handle it.
+    // Don't re-push the guard; the popstate has already consumed our last entry.
+    // On Android PWA this exits the app; on browsers it goes back in history.
+    return;
+  }
+  _backExitArmed = true;
+  showExitToast();
+  _backExitTimer = setTimeout(() => {
+    _backExitArmed = false;
+    _backExitTimer = null;
+  }, 2200);
+  _pushBackGuard();
+}
+
+// App-themed exit-warning toast (uses the existing undo-toast structure
+// re-purposed for a clean, branded look)
+function showExitToast() {
+  // Reuse the undo-toast element so we get the same styling treatment
+  const wrap = document.getElementById('undo-toast');
+  if (!wrap) { toast('Press back again to exit', 'lime'); return; }
+  // Clear any in-flight undo timers
+  if (typeof _undoToastTimers !== 'undefined') {
+    _undoToastTimers.forEach(t => clearTimeout(t));
+    _undoToastTimers.length = 0;
+  }
+  const msg = document.getElementById('undo-toast-msg');
+  const btn = document.getElementById('undo-toast-btn');
+  const progress = document.getElementById('undo-toast-progress');
+  msg.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>Press back again to exit LazNote</span>';
+  btn.textContent = 'Stay';
+  btn.onclick = () => {
+    wrap.classList.remove('show');
+    _backExitArmed = false;
+    if (_backExitTimer) { clearTimeout(_backExitTimer); _backExitTimer = null; }
+  };
+  wrap.classList.add('show');
+  // Animate progress bar over 2.2s
+  progress.style.transition = 'none';
+  progress.style.transform = 'scaleX(1)';
+  void progress.offsetWidth;
+  progress.style.transition = 'transform 2200ms linear';
+  progress.style.transform = 'scaleX(0)';
+  setTimeout(() => wrap.classList.remove('show'), 2200);
+}
+
+// Wire popstate to our guard handler. Push the initial guard after boot.
+window.addEventListener('popstate', handleHardwareBack);
+// Push the guard once the page is loaded so the first back press triggers our handler
+window.addEventListener('load', _pushBackGuard);
 
 // ─── Desktop mode (auto at >=1024px) ─────────────────────
 const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
