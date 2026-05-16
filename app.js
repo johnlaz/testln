@@ -1061,7 +1061,7 @@ function renderSettings() {
     <div class="section-group">
       <div class="row" onclick="document.getElementById('about-modal').style.display='flex'"><span class="r-label">About LazNote</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
       <div class="row" onclick="document.getElementById('help-modal').style.display='flex'"><span class="r-label">Help &amp; FAQ</span><svg class="r-chev" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 5l5 5-5 5"/></svg></div>
-      <div class="row"><span class="r-label">Version</span><span class="r-value">4.1</span></div>
+      <div class="row"><span class="r-label">Version</span><span class="r-value">4.2</span></div>
       <div class="row"><span class="r-label">Storage</span><span class="r-value">Local · IndexedDB</span></div>
     </div>
   `;
